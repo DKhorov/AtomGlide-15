@@ -1,0 +1,14 @@
+Folder: src
+Files: 5
+
+.DS_Store - 14.00 KB
+App.jsx - 1.19 KB
+index.js - 3.31 KB
+service-worker.js - 4.19 KB
+serviceWorkerRegistration.js - 3.19 KB
+
+AtomGlide Front-end Client - 15 Version Legacy
+ Author: Dmitry Khorov
+ GitHub: DKhorov
+ Telegram: @dkdevelop @jpegweb
+ 2026 Project 01.07.2026 0:00:00 MSK

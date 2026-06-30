@@ -1,0 +1,12 @@
+Folder: utils
+Files: 3
+
+lazyRetry.js - 1.55 KB
+performance.js - 10.12 KB
+subscription.js - 3.49 KB
+
+AtomGlide Front-end Client - 15 Version Legacy
+ Author: Dmitry Khorov
+ GitHub: DKhorov
+ Telegram: @dkdevelop @jpegweb
+ 2026 Project 01.07.2026 0:00:00 MSK

@@ -1,0 +1,27 @@
+Folder: system
+Files: 18
+
+.DS_Store - 8.00 KB
+auth.js - 4.06 KB
+axios.js - 1.01 KB
+boot.js - 4.43 KB
+data.js - 5.70 KB
+font.js - 0.41 KB
+getme.js - 1.99 KB
+imageOptimization.js - 8.09 KB
+island.js - 2.46 KB
+normalize.js - 2.70 KB
+performance.js - 7.99 KB
+posts.js - 2.19 KB
+posts.worker.js - 0.77 KB
+push-subscribe.js - 1.89 KB
+randomword.js - 0.42 KB
+router.js - 8.28 KB
+store.js - 0.50 KB
+userService.js - 2.50 KB
+
+AtomGlide Front-end Client - 15 Version Legacy
+ Author: Dmitry Khorov
+ GitHub: DKhorov
+ Telegram: @dkdevelop @jpegweb
+ 2026 Project 01.07.2026 0:00:00 MSK
