@@ -1,0 +1,153 @@
+:root {
+  --theme-background: #000000;
+  --theme-surface: rgba(38, 38, 38, 1);
+  --theme-surface-hover: rgba(48, 48, 48, 1);
+  --theme-text: rgba(255, 255, 255, 0.9);
+  --theme-text-secondary: rgba(154, 153, 153, 1);
+  --theme-border: rgba(209, 209, 209, 0.1);
+  --theme-accent: rgba(237, 93, 25, 1);
+}
+
+[data-theme="light"] {
+  --theme-background: #ffffff;
+  --theme-surface: rgba(245, 245, 245, 1);
+  --theme-surface-hover: rgba(235, 235, 235, 1);
+  --theme-text: rgba(0, 0, 0, 0.87);
+  --theme-text-secondary: rgba(0, 0, 0, 0.6);
+  --theme-border: rgba(0, 0, 0, 0.12);
+  --theme-accent: rgba(237, 93, 25, 1);
+}
+
+[data-theme="pink"] {
+  --theme-background: #1a0a14;
+  --theme-surface: rgba(45, 20, 35, 1);
+  --theme-surface-hover: rgba(60, 30, 48, 1);
+  --theme-text: rgba(255, 192, 203, 0.95);
+  --theme-text-secondary: rgba(255, 182, 193, 0.7);
+  --theme-border: rgba(255, 105, 180, 0.2);
+  --theme-accent: rgba(255, 105, 180, 1);
+}
+
+[data-theme="blue"] {
+  --theme-background: #0a0e1a;
+  --theme-surface: rgba(20, 30, 48, 1);
+  --theme-surface-hover: rgba(30, 42, 65, 1);
+  --theme-text: rgba(173, 216, 230, 0.95);
+  --theme-text-secondary: rgba(135, 206, 250, 0.7);
+  --theme-border: rgba(30, 144, 255, 0.2);
+  --theme-accent: rgba(30, 144, 255, 1);
+}
+
+[data-theme="purple"] {
+  --theme-background: #0f0a1a;
+  --theme-surface: rgba(30, 20, 48, 1);
+  --theme-surface-hover: rgba(45, 30, 65, 1);
+  --theme-text: rgba(216, 191, 216, 0.95);
+  --theme-text-secondary: rgba(186, 85, 211, 0.7);
+  --theme-border: rgba(138, 43, 226, 0.2);
+  --theme-accent: rgba(138, 43, 226, 1);
+}
+
+[data-theme="green"] {
+  --theme-background: #0a1a0a;
+  --theme-surface: rgba(20, 48, 20, 1);
+  --theme-surface-hover: rgba(30, 65, 30, 1);
+  --theme-text: rgba(144, 238, 144, 0.95);
+  --theme-text-secondary: rgba(50, 205, 50, 0.7);
+  --theme-border: rgba(34, 139, 34, 0.2);
+  --theme-accent: rgba(34, 139, 34, 1);
+}
+
+[data-theme="orange"] {
+  --theme-background: #1a0f0a;
+  --theme-surface: rgba(48, 30, 20, 1);
+  --theme-surface-hover: rgba(65, 42, 30, 1);
+  --theme-text: rgba(255, 218, 185, 0.95);
+  --theme-text-secondary: rgba(255, 165, 0, 0.7);
+  --theme-border: rgba(255, 140, 0, 0.2);
+  --theme-accent: rgba(255, 140, 0, 1);
+}
+
+[data-theme="red"] {
+  --theme-background: #1a0a0a;
+  --theme-surface: rgba(48, 20, 20, 1);
+  --theme-surface-hover: rgba(65, 30, 30, 1);
+  --theme-text: rgba(255, 182, 193, 0.95);
+  --theme-text-secondary: rgba(220, 20, 60, 0.7);
+  --theme-border: rgba(178, 34, 34, 0.2);
+  --theme-accent: rgba(220, 20, 60, 1);
+}
+
+body {
+  background-color: var(--theme-background) !important;
+  color: var(--theme-text) !important;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.nav, .nav3 {
+  background-color: var(--theme-surface) !important;
+  border-bottom: 1px solid var(--theme-border) !important;
+  transition: background-color 0.3s ease;
+}
+
+.nav .logo span,
+.nav-itemsр {
+  color: var(--theme-text) !important;
+}
+
+.search-bar input {
+  background-color: var(--theme-surface) !important;
+  color: var(--theme-text) !important;
+  border: 1px solid var(--theme-border) !important;
+}
+
+.search-bar input::placeholder {
+  color: var(--theme-text-secondary) !important;
+}
+
+.create-post-btn {
+  background-color: var(--theme-accent) !important;
+  color: white !important;
+}
+
+.MuiBox-root {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.MuiDialog-paper,
+.MuiModal-root .MuiBox-root {
+  background-color: var(--theme-surface) !important;
+}
+
+.MuiTextField-root .MuiInputBase-root {
+  background-color: var(--theme-surface) !important;
+  color: var(--theme-text) !important;
+}
+
+.MuiTextField-root .MuiInputLabel-root {
+  color: var(--theme-text-secondary) !important;
+}
+
+.MuiMenu-paper {
+  background-color: var(--theme-surface) !important;
+}
+
+.MuiMenuItem-root {
+  color: var(--theme-text) !important;
+}
+
+.MuiMenuItem-root:hover {
+  background-color: var(--theme-surface-hover) !important;
+}
+
+.MuiDivider-root {
+  border-color: var(--theme-border) !important;
+}
+
+/*
+ AtomGlide Front-end Client - 15 Version Legacy
+ Author: Dmitry Khorov
+ GitHub: DKhorov
+ Telegram: @dkdevelop @jpegweb
+ 2026 Project 01.07.2026 0:00:00 MSK
+*/
