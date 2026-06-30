@@ -1,0 +1,21 @@
+Folder: music
+Files: 12
+
+.DS_Store - 6.00 KB
+AuthModal.jsx - 1.10 KB
+AuthorPage.jsx - 5.75 KB
+Authors.jsx - 3.06 KB
+Essentials.jsx - 2.87 KB
+Favorites.jsx - 3.65 KB
+PlaylistPage.jsx - 19.69 KB
+Playlists.jsx - 6.81 KB
+TrackItem.jsx - 9.53 KB
+lyrics.js - 545.25 KB
+music.jsx - 5.18 KB
+play.jsx - 48.67 KB
+
+AtomGlide Front-end Client - 15 Version Legacy
+ Author: Dmitry Khorov
+ GitHub: DKhorov
+ Telegram: @dkdevelop @jpegweb
+ 2026 Project 01.07.2026 0:00:00 MSK

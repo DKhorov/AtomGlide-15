@@ -1,0 +1,13 @@
+Folder: main
+Files: 4
+
+.DS_Store - 6.00 KB
+PostCreator.jsx - 17.69 KB
+PostsList.jsx - 7.13 KB
+main.jsx - 19.50 KB
+
+AtomGlide Front-end Client - 15 Version Legacy
+ Author: Dmitry Khorov
+ GitHub: DKhorov
+ Telegram: @dkdevelop @jpegweb
+ 2026 Project 01.07.2026 0:00:00 MSK

@@ -1,0 +1,18 @@
+Folder: post
+Files: 9
+
+.DS_Store - 6.00 KB
+14.svg - 322.02 KB
+FullPost.jsx - 4.23 KB
+PostHeadeAcc.jsx - 8.91 KB
+PostHeader.jsx - 12.06 KB
+PostPhoto.jsx - 8.75 KB
+PostSkeleton.jsx - 2.53 KB
+PostText.jsx - 4.42 KB
+PostWithComments.jsx - 35.67 KB
+
+AtomGlide Front-end Client - 15 Version Legacy
+ Author: Dmitry Khorov
+ GitHub: DKhorov
+ Telegram: @dkdevelop @jpegweb
+ 2026 Project 01.07.2026 0:00:00 MSK
