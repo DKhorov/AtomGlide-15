@@ -1,0 +1,18 @@
+Folder: meta-data-github
+Files: 9
+
+test.asm - 0.00 KB
+test.cpp - 0.00 KB
+test.dart - 0.00 KB
+test.lua - 0.00 KB
+test.py - 0.51 KB
+test.r - 0.00 KB
+test.swift - 0.00 KB
+test.ts - 0.00 KB
+test2.lua - 0.00 KB
+
+AtomGlide Front-end Client - 15 Version Legacy
+ Author: Dmitry Khorov
+ GitHub: DKhorov
+ Telegram: @dkdevelop @jpegweb
+ 2026 Project 01.07.2026 0:00:00 MSK

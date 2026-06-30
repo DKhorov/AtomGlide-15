@@ -1,0 +1,37 @@
+Folder: public
+Files: 28
+
+.DS_Store - 8.00 KB
+1 copy.png - 241.14 KB
+1.png - 241.14 KB
+2.png - 3.19 KB
+23.png - 219.30 KB
+2434.jpg - 58.62 KB
+3.png - 0.61 KB
+4.png - 2.11 KB
+Frame 156.png - 104.97 KB
+Frame 263.png - 106.21 KB
+Frame 274.png - 4.96 KB
+Frame 474.png - 98.49 KB
+PICO1.png - 44.75 KB
+PICO2.png - 51.04 KB
+atomglidelogo.png - 1241.96 KB
+atomwiki.html - 56.00 KB
+favicon.ico - 3.78 KB
+feed.html - 12.48 KB
+giphy.gif - 863.87 KB
+index.html - 3.45 KB
+logo192.png - 5.22 KB
+logo512.png - 9.44 KB
+manifest.json - 0.39 KB
+midper.apk.zip - 34467.85 KB
+nft.png - 1083.35 KB
+s.html - 5.42 KB
+sad.png - 407.84 KB
+sw.js - 1.00 KB
+
+AtomGlide Front-end Client - 15 Version Legacy
+ Author: Dmitry Khorov
+ GitHub: DKhorov
+ Telegram: @dkdevelop @jpegweb
+ 2026 Project 01.07.2026 0:00:00 MSK
