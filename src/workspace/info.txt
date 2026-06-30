@@ -1,0 +1,17 @@
+Folder: workspace
+Files: 8
+
+Frame 363.png - 744.89 KB
+Group 1 1.png - 0.00 KB
+Screenshot_20260516_000309.png - 121.86 KB
+fr.png - 523.14 KB
+mid.png - 917.88 KB
+midper.jsx - 45.14 KB
+w.png - 200.92 KB
+y.png - 983.59 KB
+
+AtomGlide Front-end Client - 15 Version Legacy
+ Author: Dmitry Khorov
+ GitHub: DKhorov
+ Telegram: @dkdevelop @jpegweb
+ 2026 Project 01.07.2026 0:00:00 MSK

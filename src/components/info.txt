@@ -1,0 +1,25 @@
+Folder: components
+Files: 16
+
+.DS_Store - 6.00 KB
+CommentForm.jsx - 6.48 KB
+CommentItem.jsx - 9.06 KB
+CommentSection.jsx - 4.26 KB
+DynamicIslandProvider.jsx - 2.68 KB
+GeromikModal.jsx - 16.96 KB
+GradientFlashes.js - 8.21 KB
+OptimizedImage.jsx - 3.36 KB
+PerformanceMonitor.jsx - 6.00 KB
+ReplyItem.jsx - 7.51 KB
+SubscriptionPurchase.jsx - 8.90 KB
+TopLoader.jsx - 0.61 KB
+UserProvider.jsx - 1.92 KB
+VirtualizedComments.jsx - 5.96 KB
+VirtualizedFeed.jsx - 3.00 KB
+icon.jsx - 17.34 KB
+
+AtomGlide Front-end Client - 15 Version Legacy
+ Author: Dmitry Khorov
+ GitHub: DKhorov
+ Telegram: @dkdevelop @jpegweb
+ 2026 Project 01.07.2026 0:00:00 MSK
