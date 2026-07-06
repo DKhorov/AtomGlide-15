@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   Box, Typography, Button, MenuItem, Select,
   useMediaQuery, FormControl, Grow, Fade, Modal, Backdrop, Fade as MuiFade,
@@ -10,9 +10,9 @@ import { useIsland } from '../../components/DynamicIslandProvider';
 const Store = () => {
   const [products, setProducts] = useState([]);
   const [currentCollection, setCurrentCollection] = useState(null);
-  const [purchaseSuccess, setPurchaseSuccess] = useState(false);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false); // Защита от спам-кликов по кнопке "Купить"
   const isMobile = useMediaQuery('(max-width:900px)');
   const [sortBy, setSortBy] = useState("new");
   const showIsland = useIsland();
@@ -24,42 +24,59 @@ const Store = () => {
   const fetchProducts = async () => {
     try {
       const res = await axios.get("/store/products");
-      // Фильтруем сразу при получении: убираем то, чего 0 или меньше (если нужно скрыть совсем)
       const visibleProducts = res.data.filter(item => item.quantity > 0);
       setProducts(visibleProducts);
     } catch (err) {
       console.error("Ошибка загрузки товаров:", err);
+      showIsland('Не удалось загрузить товары', 'Error', '#f44336');
     }
   };
 
-  const groupedProducts = Object.values(
-    products.reduce((acc, item) => {
-      const key = item.title;
-      if (!acc[key]) acc[key] = { ...item, quantity: 0, sold: 0, items: [] };
-      acc[key].quantity += item.quantity;
-      acc[key].sold += item.sold;
-      acc[key].items.push(item);
-      return acc;
-    }, {})
-  ).filter(group => (group.quantity - group.sold) > 0); 
+  // Оптимизируем перерасчет групп с помощью useMemo
+  const groupedProducts = useMemo(() => {
+    return Object.values(
+      products.reduce((acc, item) => {
+        const key = item.title;
+        if (!acc[key]) acc[key] = { ...item, quantity: 0, sold: 0, items: [] };
+        acc[key].quantity += item.quantity;
+        acc[key].sold += item.sold;
+        acc[key].items.push(item);
+        return acc;
+      }, {})
+    ).filter(group => (group.quantity - group.sold) > 0);
+  }, [products]);
 
-  const sortedGroups = [...groupedProducts].sort((a, b) => {
-    if (sortBy === "expensive") return b.price - a.price;
-    if (sortBy === "cheap") return a.price - b.price;
-    if (sortBy === "new") return new Date(b.createdAt) - new Date(a.createdAt);
-    if (sortBy === "old") return new Date(a.createdAt) - new Date(b.createdAt);
-    return 0;
-  });
+  // Оптимизируем сортировку групп
+  const sortedGroups = useMemo(() => {
+    return [...groupedProducts].sort((a, b) => {
+      if (sortBy === "expensive") return b.price - a.price;
+      if (sortBy === "cheap") return a.price - b.price;
+      if (sortBy === "new") return new Date(b.createdAt) - new Date(a.createdAt);
+      if (sortBy === "old") return new Date(a.createdAt) - new Date(b.createdAt);
+      return 0;
+    });
+  }, [groupedProducts, sortBy]);
+
+  // Обновление текущей выбранной коллекции, если товары внутри нее изменились (после покупки)
+  useEffect(() => {
+    if (currentCollection) {
+      const updatedCollection = sortedGroups.find(g => g.title === currentCollection.title);
+      setCurrentCollection(updatedCollection || null);
+    }
+  }, [sortedGroups, currentCollection]);
 
   const handleBuy = async (productId) => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     try {
       await axios.post(`/store/products/${productId}/buy`, {}, { withCredentials: true });
-      setPurchaseSuccess(true);
-      fetchProducts();
-                 showIsland('Оплата прошла успешно!', 'CheckCircle', '#4caf50');
-
+      showIsland('Оплата прошла успешно!', 'CheckCircle', '#4caf50');
+      closeConfirmModal(); // Автоматически закрываем модалку при успехе
+      await fetchProducts(); // Ждем обновления пула товаров
     } catch (err) {
-      showIsland('Ошибка оплаты. Товар не доступен', 'Error', '#f44336');;
+      showIsland('Ошибка оплаты. Товар недоступен', 'Error', '#f44336');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -125,7 +142,7 @@ const Store = () => {
                   alt={item.title}
                   style={{ width: '140px', height: '140px', objectFit: 'contain' }}
                 />
-                <Typography sx={{ color: 'white', fontSize: '1.1rem', fontWeight: 500 ,mb:-2}}>
+                <Typography sx={{ color: 'white', fontSize: '1.1rem', fontWeight: 500, mb: -2 }}>
                   {item.title}
                 </Typography>
                 <Typography sx={{
@@ -153,66 +170,67 @@ const Store = () => {
           )}
         </Box>
 
-      <Modal
-open={confirmModalOpen}
-onClose={closeConfirmModal}
-closeAfterTransition
-BackdropComponent={Backdrop}
-BackdropProps={{ timeout: 500 }}
->
-<MuiFade in={confirmModalOpen}>
-<Box sx={{
-position: 'absolute',
-top: '50%',
-left: '50%',
-transform: 'translate(-50%, -50%)',
-width: isMobile ? '90%' : 400,
-bgcolor: 'rgba(28,28,28,1)',
-borderRadius: 3,
-boxShadow: 24,
-p: 4,
-textAlign: 'center',
-}}>
-{selectedProduct && (
-<>
-<center> <img src={selectedProduct.imageUrl} alt={selectedProduct.title} style={{ width: 'auto', height: '120px', borderRadius: 8, marginBottom: '10px' }} />
-</center>
-<Typography sx={{ color: 'white', fontWeight: '600', fontSize: 18 }}>{selectedProduct.title}</Typography>
-<Typography sx={{ color: 'gray', fontSize: 14, mb: 1 }}>{selectedProduct.description}</Typography>
-<Table sx={{ color: 'white', mb: 2 }}>
-<TableBody>
-<TableRow>
-<TableCell sx={{ color: 'white', fontSize: 15 }}>Цена:</TableCell>
-<TableCell sx={{ color: 'gold', fontSize: 16 }}>{selectedProduct.price} atm</TableCell>
-</TableRow>
-<TableRow>
-<TableCell sx={{ color: 'white', fontSize: 15}}>Продавец:</TableCell>
-<TableCell sx={{ color: 'gray', fontSize: 15 }}>{selectedProduct.seller || "AtomGlide"}</TableCell>
-</TableRow>
-<TableRow>
-<TableCell sx={{ color: 'white', fontSize: 15}}>Владелец:</TableCell>
-<TableCell sx={{ color: 'gray', fontSize: 15 }}>{"AtomGlide"}</TableCell>
-</TableRow>
-<TableRow>
-<TableCell sx={{ color: 'white', fontSize: 15 }}>Налог:</TableCell>
-<TableCell sx={{ color: 'gray', fontSize: 15 }}>0 atm</TableCell>
-</TableRow>
-</TableBody>
-</Table>
-<Button
-variant="contained"
-sx={{ background: '#be8221ff', borderRadius: '8px', mt: 1 }}
-onClick={() => handleBuy(selectedProduct._id)}
->
-Подтвердить покупку
-</Button>
-<Typography sx={{ color: 'gray', fontSize: '12px',mt:1 }}>Биржа: AtomGlide Network</Typography>
-
-</>
-)}
-</Box>
-</MuiFade>
-</Modal>
+        <Modal
+          open={confirmModalOpen}
+          onClose={closeConfirmModal}
+          closeAfterTransition
+          slots={{ backdrop: Backdrop }}
+          slotProps={{ backdrop: { timeout: 500 } }}
+        >
+          <MuiFade in={confirmModalOpen}>
+            <Box sx={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: isMobile ? '90%' : 400,
+              bgcolor: 'rgba(28,28,28,1)',
+              borderRadius: 3,
+              boxShadow: 24,
+              p: 4,
+              textAlign: 'center',
+            }}>
+              {selectedProduct && (
+                <>
+                  <Box sx={{ display: 'flex', justifyContent: 'center', mb: '10px' }}>
+                    <img src={selectedProduct.imageUrl} alt={selectedProduct.title} style={{ width: 'auto', height: '120px', borderRadius: 8 }} />
+                  </Box>
+                  <Typography sx={{ color: 'white', fontWeight: '600', fontSize: 18 }}>{selectedProduct.title}</Typography>
+                  <Typography sx={{ color: 'gray', fontSize: 14, mb: 1 }}>{selectedProduct.description}</Typography>
+                  <Table sx={{ color: 'white', mb: 2 }}>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell sx={{ color: 'white', fontSize: 15, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>Цена:</TableCell>
+                        <TableCell sx={{ color: 'gold', fontSize: 16, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>{selectedProduct.price} atm</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell sx={{ color: 'white', fontSize: 15, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>Продавец:</TableCell>
+                        <TableCell sx={{ color: 'gray', fontSize: 15, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>{selectedProduct.seller || "AtomGlide"}</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell sx={{ color: 'white', fontSize: 15, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>Владелец:</TableCell>
+                        <TableCell sx={{ color: 'gray', fontSize: 15, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>{"AtomGlide"}</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell sx={{ color: 'white', fontSize: 15, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>Налог:</TableCell>
+                        <TableCell sx={{ color: 'gray', fontSize: 15, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>0 atm</TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                  <Button
+                    variant="contained"
+                    disabled={isSubmitting}
+                    sx={{ background: '#be8221ff', borderRadius: '8px', mt: 1, '&:hover': { background: '#ff9d00ff' } }}
+                    onClick={() => handleBuy(selectedProduct._id)}
+                  >
+                    {isSubmitting ? 'Обработка...' : 'Подтвердить покупку'}
+                  </Button>
+                  <Typography sx={{ color: 'gray', fontSize: '12px', mt: 2 }}>Биржа: AtomGlide Network</Typography>
+                </>
+              )}
+            </Box>
+          </MuiFade>
+        </Modal>
       </Box>
     );
   }
@@ -225,7 +243,7 @@ onClick={() => handleBuy(selectedProduct._id)}
       scrollbarWidth: 'none',
       px: 1, mt: isMobile ? 2 : 0,
     }}>
-      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: 'center', mb: 2, mt: 1 }}>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: 'center', mb: 2, mt: 1, gap: isMobile ? 1 : 0 }}>
         <Typography sx={{ color: 'white', fontSize: '22px', fontWeight: 600 }}>
           Магазин AtomStore
         </Typography>
@@ -233,7 +251,13 @@ onClick={() => handleBuy(selectedProduct._id)}
           <Select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            sx={{ color: 'white', borderRadius: '130px', '.MuiOutlinedInput-notchedOutline': { borderColor: 'transperent' } }}
+            sx={{ 
+              color: 'white', 
+              borderRadius: '130px', 
+              '.MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.2)' },
+              '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#be8221ff' },
+              '.MuiSvgIcon-root': { color: 'white' }
+            }}
           >
             <MenuItem value="expensive">Дорогие → дешёвые</MenuItem>
             <MenuItem value="cheap">Дешёвые → дорогие</MenuItem>
@@ -255,8 +279,9 @@ onClick={() => handleBuy(selectedProduct._id)}
                 backgroundColor: 'rgba(56, 64, 73, 0.42)',
                 backdropFilter: 'blur(10px)',
                 cursor: 'pointer',
-                transition: 'transform 0.2s',
-                '&:hover': { transform: 'translateY(-4px)' },
+                transition: 'transform 0.2s, border-color 0.2s',
+                border: '1px solid transparent',
+                '&:hover': { transform: 'translateY(-4px)', borderColor: 'rgba(190, 130, 33, 0.4)' },
                 display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', p: 2.5,
               }}
               onClick={() => setCurrentCollection(group)}
@@ -270,31 +295,17 @@ onClick={() => handleBuy(selectedProduct._id)}
         ))}
       </Box>
 
-
-      <Fade in={purchaseSuccess}>
-        <Box sx={{ position: 'fixed', top: '10%', left: '50%', transform: 'translateX(-50%)', bgcolor: '#4caf50', color: 'white', px: 4, py: 2, borderRadius: '12px', zIndex: 9999 }}>
-          Успешно куплено!
-        </Box>
-      </Fade>
+      <Typography sx={{ color: 'gray', fontSize: '14px', mt: 4, mb: 2 }}>
+        Все покупки приобретаются за внутреннюю валюту — atm. Цены в магазине регулируются установленными нормативами торговли в сети AtomGlide Network. Все платежи проходят модерацию с целью исключения использования нечестно заработанной валюты. 
+      </Typography>
       <Typography sx={{ color: 'gray', fontSize: '14px', mt: 2, mb: 2 }}>
-Все покупки приобретаются за внутреннюю валюту — atm. Цены в магазине регулируются установленными нормативами торговли в сети AtomGlide Network. Все платежи проходят модерацию с целью исключения использования нечестно заработанной валюты. 
-</Typography>
-<Typography sx={{ color: 'gray', fontSize: '14px', mt: 2, mb: 2 }}>
-Товары в магазине не являются офертой. Все покупки носят исключительно развлекательный характер и не являются основанием для возникновения имущественных прав. К каждому товару прилагается свой уникальный номер владельца, при покупке номер продаваца переходит к покупателю. После покупки вы являетесь единственным владельцем приобретенного товара. В случае нарушения правил магазина администрация оставляет за собой право аннулировать покупку и изъять товар без компенсации. Магазин не поддерживает возврат средств за приобретенные товары. Товары стоймостью менее 1000 atm проходят особую проверку покупателя на подтверждение легальности средств через админов лс в тг . Товары в магазин поставляются через официальных поставщиков, все продавци имеют лицензию на торговлю цифровыми товарами. А также прошли проверку администрации AtomGlide.
-</Typography>
-<Typography sx={{ color: 'gray', fontSize: '14px', mt: 2, mb: 70 }}>
-© 2026 Проект компании AtomGlide. Все права защищены.
-</Typography>
+        Товары в магазине не являются офертой. Все покупки носят исключительно развлекательный характер и не являются основанием для возникновения имущественных прав. К каждому товару прилагается свой уникальный номер владельца, при покупке номер продавца переходит к покупателю. После покупки вы являетесь единственным владельцем приобретенного товара. В случае нарушения правил магазина администрация оставляет за собой право аннулировать покупку и изъять товар без компенсации. Магазин не поддерживает возврат средств за приобретенные товары. Товары стоимостью менее 1000 atm проходят особую проверку покупателя на подтверждение легальности средств через админов лс в тг. Товары в магазин поставляются через официальных поставщиков, все продавцы имеют лицензию на торговлю цифровыми товарами. А также прошли проверку администрации AtomGlide.
+      </Typography>
+      <Typography sx={{ color: 'gray', fontSize: '14px', mt: 2, mb: 10 }}>
+        © 2026 Проект компании AtomGlide. Все права защищены.
+      </Typography>
     </Box>
   );
 };
 
 export default Store;
-
-/*
- AtomGlide Front-end Client - 15 Version Legacy
- Author: Dmitry Khorov
- GitHub: DKhorov
- Telegram: @dkdevelop @jpegweb
- 2026 Project 01.07.2026 0:00:00 MSK
-*/

@@ -151,7 +151,7 @@ const PostPhoto = ({ post, postIndex = 0 }) => {
     <>
       <Box sx={{ width: '100%', mt: 1, mb: 2 }}>
         {images.length === 1 ? (
-          <Box sx={{ borderRadius: '20px', overflow: 'hidden' }}>
+          <Box sx={{ borderRadius: '5px', overflow: 'hidden' }}>
             {renderMediaItem(images[0], 0, true)}
           </Box>
         ) : (
