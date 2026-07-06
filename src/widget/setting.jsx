@@ -443,7 +443,7 @@ const MobileSettings = ({ onClose }) => {
               <Box sx={{ mt: 1, mb: 1, p: 2, borderRadius: '15px', backgroundColor: 'rgba(255,255,255,0.03)' }}>
                 <Typography sx={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.6 }}>
                   • Форматы: <b>JPG, PNG, GIF</b> (WEBP не поддерживается)<br />
-                  • Максимальный вес: <b>1 МБ</b><br />
+                  • Максимальный вес: <b>5 МБ</b><br />
                   • Аватар: рекомендуем <b>500x500px</b><br />
                   • Фон: рекомендуем от <b>1000px</b> по ширине
                 </Typography>

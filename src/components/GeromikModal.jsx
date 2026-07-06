@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import axios from '../system/axios';
 import { setTrack, nextTrack, prevTrack, togglePlay } from '../system/redux/playerSlice'; 
+import { selectUser } from '../system/redux/slices/getme';
 
 const COVER = "https://images.unsplash.com/photo-1549492167-27e1f4869c0d?w=800&auto=format&fit=crop&q=60";
 
 const parseIntent = (input) => {
   const text = input.toLowerCase().trim();
 
-  // 1. Фикс текста (проверка орфографии)
-  if (/(исправ|провер|ошибк|грамат|опечат|текст)/i.test(text)) {
+  if (/(исправ|провер|ошибк|грамот|опечат|текст)/i.test(text)) {
     const payload = input.replace(/(исправь|ошибки|проверь|текст|в словах|опечатки|грамотность)/gi, '').trim();
     return { type: 'FIX_TEXT', payload: payload || input };
   }
@@ -19,8 +19,16 @@ const parseIntent = (input) => {
     return { type: 'CREATE_POST', payload };
   }
 
+  if (/(курс|валют|доллар|евро|переведи|конвертируй|byn|rub|usd|eur)/i.test(text) && !/(текст)/i.test(text)) {
+    return { type: 'CURRENCY_RATE', payload: text };
+  }
+
   if (/(стоп|пауз|останов|хватит|тормоз)/i.test(text)) {
     return { type: 'STOP_TRACK' };
+  }
+
+  if (/(включ|вруб|сыгра|плей|слушат)/i.test(text) && /(избран|любим|мои трек|мой трек)/i.test(text)) {
+    return { type: 'PLAY_FAVORITES' };
   }
 
   if (/(след|следующ|дальше|скип|next|предыдущ|назад|prev)/i.test(text)) {
@@ -30,7 +38,7 @@ const parseIntent = (input) => {
     return { type: 'NEXT_TRACK' };
   }
 
-  if (/(включ|вруб|сыгра|музык|песн|трек|плей|слушат|джексон|майкл)/i.test(text)) {
+  if (/(включ|вруб|сыгра|музык|песн|трек|плей|слушат)/i.test(text)) {
     const payload = input.replace(/(включи|врубай|сыграй|музыку|песню|трек|пожалуйста|плей|вруби)/gi, '').trim();
     return { type: 'PLAY_MUSIC', payload };
   }
@@ -42,18 +50,27 @@ const generateId = () => Date.now().toString() + Math.random().toString(36).subs
 
 const GeromikModal = ({ isOpen, onClose }) => {
   const dispatch = useDispatch();
+  const user = useSelector(selectUser);
   
   const [isRendered, setIsRendered] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [messages, setMessages] = useState([
-    { id: 'initial-bot-msg', sender: 'bot', text: 'Дарова, ну че хочешь? Например спроси : включи музыку и я открою. Создать пост? Без проблем! Напипши мне создать пост и текст поста. Но я троху тупой но скоро вроде буду умнее' },
-        { id: 'initial-bot-msg', sender: 'bot', text: 'А я еще умный поиск постов. Просто напиши что тебе нужно, и я тебе найду посты под твой запрос. ' }
-
+    { id: 'initial-bot-msg-1', sender: 'bot', text: 'Дарова, ну че хочешь? Например спроси: включи музыку и я открою. Создать пост? Без проблем! Напиши мне создать пост и текст поста. Но я немного тупой, но скоро вроде буду умнее' },
+    { id: 'initial-bot-msg-2', sender: 'bot', text: 'А я еще умный поиск постов. Просто напиши что тебе нужно, и я тебе найду посты под твой запрос.' }
   ]);
 
   const [apiRequestsLog, setApiRequestsLog] = useState([]);
   const messagesEndRef = useRef(null);
+  const shortcutsRef = useRef(null);
+
+  const shortcuts = [
+    'Включи музыку', 
+    'Останови музыку', 
+    'Включить избранное', 
+    'Курс доллара', 
+    'Переведи 100 бел рублей в рос'
+  ];
 
   useEffect(() => {
     if (isOpen) {
@@ -82,12 +99,18 @@ const GeromikModal = ({ isOpen, onClose }) => {
     if (onClose) onClose();
   };
 
+  const scrollShortcuts = (direction) => {
+    if (shortcutsRef.current) {
+      const amount = direction === 'left' ? -200 : 200;
+      shortcutsRef.current.scrollBy({ left: amount, behavior: 'smooth' });
+    }
+  };
+
   const parseBotResponseText = (text) => {
     if (!text.includes('--- Источник')) {
       return [{ type: 'text', content: text }];
     }
 
-    // Разбиваем строку на заголовок и сами блоки постов
     const parts = text.split(/--- Источник \[ID: ([a-f0-9]+)\] ---/i);
     const result = [];
     
@@ -114,6 +137,44 @@ const GeromikModal = ({ isOpen, onClose }) => {
     let botResponse = "";
 
     switch (intent.type) {
+      case 'CURRENCY_RATE': {
+        try {
+          const res = await fetch('https://open.er-api.com/v6/latest/USD');
+          const data = await res.json();
+          const rates = data.rates;
+
+          const text = intent.payload;
+          const matchVal = text.match(/\d+([\.,]\d+)?/);
+          const amount = matchVal ? parseFloat(matchVal[0].replace(',', '.')) : null;
+
+          if (amount) {
+            let fromStr = "USD", toStr = "RUB";
+            let fromRate = 1, toRate = rates.RUB;
+
+            if (/(бел|byn)/i.test(text)) { fromStr = "BYN"; fromRate = rates.BYN; }
+            else if (/(евро|eur)/i.test(text)) { fromStr = "EUR"; fromRate = rates.EUR; }
+            else if (/(рос|rub)/i.test(text) || (/(руб)/i.test(text) && !/(бел)/i.test(text))) { fromStr = "RUB"; fromRate = rates.RUB; }
+
+            if (/(в рос|в руб|в rub)/i.test(text) && !/(в бел)/i.test(text)) { toStr = "RUB"; toRate = rates.RUB; }
+            else if (/(в дол|в usd|в бакс)/i.test(text)) { toStr = "USD"; toRate = 1; }
+            else if (/(в евро|в eur)/i.test(text)) { toStr = "EUR"; toRate = rates.EUR; }
+            else if (/(в бел|в byn)/i.test(text)) { toStr = "BYN"; toRate = rates.BYN; }
+            else {
+              if (fromStr === "RUB") { toStr = "USD"; toRate = 1; }
+              else if (fromStr === "BYN") { toStr = "RUB"; toRate = rates.RUB; }
+            }
+
+            const result = (amount / fromRate) * toRate;
+            botResponse = ` Перевод: ${amount} ${fromStr} ≈ ${result.toFixed(2)} ${toStr}`;
+          } else {
+            botResponse = ` Актуальный курс валют:\n🇺🇸 1 USD = ${rates.RUB.toFixed(2)} RUB\n🇧🇾 1 USD = ${rates.BYN.toFixed(2)} BYN\n🇪🇺 1 EUR = ${(1 / rates.EUR * rates.RUB).toFixed(2)} RUB\n🇧🇾 1 BYN = ${(1 / rates.BYN * rates.RUB).toFixed(2)} RUB`;
+          }
+        } catch (err) {
+          botResponse = "❌ Ошибка при получении курса валют. Сервер недоступен.";
+        }
+        break;
+      }
+
       case 'STOP_TRACK': {
         dispatch(togglePlay());
         botResponse = "⏸ Плеер остановлен (или снят с паузы).";
@@ -129,6 +190,38 @@ const GeromikModal = ({ isOpen, onClose }) => {
       case 'PREV_TRACK': {
         dispatch(prevTrack());
         botResponse = "⏮ Включаю предыдущий трек";
+        break;
+      }
+
+      case 'PLAY_FAVORITES': {
+        if (!user) {
+          botResponse = "Войди в аккаунт, чтобы просматривать и слушать избранное.";
+          break;
+        }
+
+        const favoritesEndpoint = '/music/liked';
+        logApiRequest(favoritesEndpoint, 'GET');
+
+        try {
+          const response = await axios.get(favoritesEndpoint);
+          const rawTracks = response.data || [];
+          const validTracks = rawTracks.reverse().filter(t => typeof t === "object").map(track => ({
+            ...track,
+            cover: track.cover || COVER,
+            title: track.title || "Без названия",
+            genre: track.genre || "Без жанра",
+          }));
+
+          if (validTracks.length > 0) {
+            dispatch(setTrack({ playlist: validTracks, index: 0 }));
+            botResponse = `Включаю твои любимые треки. Всего в избранном: ${validTracks.length} шт.`;
+          } else {
+            botResponse = "У тебя пока нет любимых треков в избранном.";
+          }
+        } catch (error) {
+          console.error(error);
+          botResponse = "❌ Ошибка при загрузке избранных треков.";
+        }
         break;
       }
 
@@ -259,35 +352,60 @@ const GeromikModal = ({ isOpen, onClose }) => {
     return botResponse;
   };
 
-  const handleSendMessage = async (e) => {
-    e.preventDefault();
-    if (!inputValue.trim()) return;
+  const sendText = async (text) => {
+    if (!text.trim()) return;
 
-    const userText = inputValue;
     const userMsgId = generateId();
-    
-    setMessages((prev) => [...prev, { id: userMsgId, sender: 'user', text: userText }]);
+    setMessages((prev) => [...prev, { id: userMsgId, sender: 'user', text }]);
     setInputValue('');
 
     const typingId = generateId();
     setMessages((prev) => [...prev, { id: typingId, sender: 'bot', text: 'Запрос обрабатывается...' }]);
 
-    const replyText = await processCommand(userText);
+    const replyText = await processCommand(text);
 
     setMessages((prev) => 
       prev.map(msg => msg.id === typingId ? { ...msg, text: replyText } : msg)
     );
   };
 
+  const handleSendMessage = (e) => {
+    e.preventDefault();
+    sendText(inputValue);
+  };
+
   if (!isRendered) return null;
 
   return (
     <div style={{ 
-      position: 'fixed', top: 0, left: 0, right: 0, 
-      zIndex: 10000, display: 'flex', justifyContent: 'center', pointerEvents: 'none' 
+      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+      zIndex: 10000, display: 'flex', justifyContent: 'center', alignItems: 'flex-start', pointerEvents: 'none' 
     }}>
       <style>
         {`
+          .geromik-modal-container {
+            background-color: #0a0a0a;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+            pointer-events: auto;
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+            display: flex;
+            flex-direction: column;
+            margin-top: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            height: 570px;
+            width: 520px;
+          }
+
+          .modal-opening {
+            animation: dropDownCustom 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          }
+
+          .modal-closing {
+            animation: dropUpCustom 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          }
+
           @keyframes dropDownCustom {
             0% { transform: translateY(-100px); opacity: 0; height: 50px; width: 100px; border-radius: 100px; }
             100% { transform: translateY(0); opacity: 1; height: 570px; width: 520px; border-radius: 24px; }
@@ -296,9 +414,49 @@ const GeromikModal = ({ isOpen, onClose }) => {
             0% { transform: translateY(0); opacity: 1; height: 570px; width: 520px; border-radius: 24px; }
             100% { transform: translateY(-100px); opacity: 0; height: 50px; width: 100px; border-radius: 100px; }
           }
+          
           .chat-scroll::-webkit-scrollbar { width: 5px; }
           .chat-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
           
+          .shortcuts-scroll::-webkit-scrollbar { display: none; }
+          
+          .shortcut-btn {
+            padding: 8px 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background-color: rgba(255,255,255,0.03);
+            color: #ccc;
+            font-size: 13px;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+          }
+          .shortcut-btn:hover {
+            background-color: rgba(255,255,255,0.1);
+            color: #fff;
+            border-color: rgb(237, 93, 25);
+          }
+
+          .scroll-arrow-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #fff;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+            flex-shrink: 0;
+          }
+          .scroll-arrow-btn:hover {
+            background: rgb(237, 93, 25);
+            border-color: rgb(237, 93, 25);
+          }
+
           .ai-post-card {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.06);
@@ -327,17 +485,34 @@ const GeromikModal = ({ isOpen, onClose }) => {
             background-color: rgb(237, 93, 25);
             border-color: rgb(237, 93, 25);
           }
+
+          @media (max-width: 768px) {
+            .geromik-modal-container {
+              margin-top: 0;
+              border: none;
+              border-radius: 0;
+              width: 100%;
+              height: 100%;
+            }
+            @keyframes dropDownCustom {
+              0% { transform: translateY(100%); opacity: 0; }
+              100% { transform: translateY(0); opacity: 1; height: 100%; width: 100%; border-radius: 0; }
+            }
+            @keyframes dropUpCustom {
+              0% { transform: translateY(0); opacity: 1; height: 100%; width: 100%; border-radius: 0; }
+              100% { transform: translateY(100%); opacity: 0; }
+            }
+            .scroll-arrow-btn {
+              display: none;
+            }
+            .shortcuts-wrapper {
+              padding: 0 16px 12px 16px !important;
+            }
+          }
         `}
       </style>
       
-      <div style={{
-        backgroundColor: '#0a0a0a', marginTop: '20px',
-        border: '1px solid rgba(255, 255, 255, 0.08)', boxShadow: '0 20px 40px rgba(0, 0, 0, 0.6)',
-        pointerEvents: 'auto', overflow: 'hidden', backdropFilter: 'blur(20px)',
-        animation: isClosing 
-          ? 'dropUpCustom 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards' 
-          : 'dropDownCustom 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
-      }}>
+      <div className={`geromik-modal-container ${isClosing ? 'modal-closing' : 'modal-opening'}`}>
         <div style={{
           width: '100%', height: '100%', display: 'flex', flexDirection: 'column',
           boxSizing: 'border-box', opacity: isClosing ? 0 : 1, transition: isClosing ? 'opacity 0.15s ease-in' : 'opacity 0.25s ease-out',
@@ -349,7 +524,7 @@ const GeromikModal = ({ isOpen, onClose }) => {
           }}>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               <span style={{ color: '#fff', fontWeight: 600, fontSize: '1rem', letterSpacing: '0.5px' }}>Geromik Logic</span>
-              <span style={{ color: 'rgb(237, 93, 25)', fontSize: '11px' }}>Данный чат еще в бета. Могуть быть ошибки</span>
+              <span style={{ color: 'rgb(237, 93, 25)', fontSize: '11px' }}>Данный чат еще в бета. Могут быть ошибки</span>
             </div>
             <span onClick={onClose} style={{ color: '#fff', opacity: 0.4, cursor: 'pointer', fontSize: '1.2rem' }}>✕</span>
           </div>
@@ -393,31 +568,54 @@ const GeromikModal = ({ isOpen, onClose }) => {
             <div ref={messagesEndRef} />
           </div>
 
-          <form onSubmit={handleSendMessage} style={{
-            padding: '20px 24px', borderTop: '1px solid rgba(255,255,255,0.05)', backgroundColor: '#0a0a0a'
-          }}>
-            <div style={{
-              display: 'flex', backgroundColor: '#111', borderRadius: '14px',
-              padding: '12px 18px', border: '1px solid rgba(255,255,255,0.08)', alignItems: 'center'
-            }}>
-              <input 
-                type="text"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                placeholder="Введи команду или фразу для поиска..."
+          <div style={{ backgroundColor: '#0a0a0a', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '16px' }}>
+            <div className="shortcuts-wrapper" style={{ display: 'flex', alignItems: 'center', padding: '0 24px 12px 24px', gap: '8px' }}>
+              <button onClick={() => scrollShortcuts('left')} className="scroll-arrow-btn">❮</button>
+              <div 
+                ref={shortcutsRef}
+                className="shortcuts-scroll" 
                 style={{
-                  flex: 1, backgroundColor: 'transparent', border: 'none', color: '#fff',
-                  outline: 'none', fontSize: '14px', fontFamily: 'inherit'
+                  display: 'flex', gap: '8px', overflowX: 'auto', whiteSpace: 'nowrap',
+                  WebkitOverflowScrolling: 'touch', flex: 1, scrollbarWidth: 'none'
                 }}
-              />
-              <button type="submit" style={{
-                background: 'none', border: 'none', color: 'rgb(237, 93, 25)', 
-                cursor: 'pointer', fontWeight: 'bold', fontSize: '1.1rem', paddingLeft: '10px'
-              }}>
-                ➤
-              </button>
+              >
+                {shortcuts.map(sc => (
+                  <button
+                    key={sc}
+                    onClick={() => sendText(sc)}
+                    className="shortcut-btn"
+                  >
+                    {sc}
+                  </button>
+                ))}
+              </div>
+              <button onClick={() => scrollShortcuts('right')} className="scroll-arrow-btn">❯</button>
             </div>
-          </form>
+
+            <form onSubmit={handleSendMessage} style={{ padding: '0 24px 20px 24px' }}>
+              <div style={{
+                display: 'flex', backgroundColor: '#111', borderRadius: '14px',
+                padding: '12px 18px', border: '1px solid rgba(255,255,255,0.08)', alignItems: 'center'
+              }}>
+                <input 
+                  type="text"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  placeholder="Введи команду или фразу для поиска..."
+                  style={{
+                    flex: 1, backgroundColor: 'transparent', border: 'none', color: '#fff',
+                    outline: 'none', fontSize: '14px', fontFamily: 'inherit'
+                  }}
+                />
+                <button type="submit" style={{
+                  background: 'none', border: 'none', color: 'rgb(237, 93, 25)', 
+                  cursor: 'pointer', fontWeight: 'bold', fontSize: '1.1rem', paddingLeft: '10px'
+                }}>
+                  ➤
+                </button>
+              </div>
+            </form>
+          </div>
           
         </div>
       </div>
@@ -426,11 +624,3 @@ const GeromikModal = ({ isOpen, onClose }) => {
 };
 
 export default GeromikModal;
-
-/*
- AtomGlide Front-end Client - 15 Version Legacy
- Author: Dmitry Khorov
- GitHub: DKhorov
- Telegram: @dkdevelop @jpegweb
- 2026 Project 01.07.2026 0:00:00 MSK
-*/
