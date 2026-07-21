@@ -148,7 +148,7 @@ const WidgetMain = React.memo(() => {
 
     const fetchLatestTracks = async () => {
       try {
-        const { data } = await axios.get('/tracks');
+        const { data } = await axios.get('/tracksq');
         const processed = data.slice(0, 10).map((t) => ({
           ...t,
           cover: t.cover || "https://images.unsplash.com/photo-1549492167-27e1f4869c0d?w=800&auto=format&fit=crop&q=60",
