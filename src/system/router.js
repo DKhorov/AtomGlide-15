@@ -7,7 +7,7 @@ import Sitebar from '../sitebar';
 import WidgetMain from '../widget/widget';
 import AudioPlayer from '../page/music/play'; 
 
-
+import { AlertsPage } from './alertnotf'; // Импортируем компонент AlertsPage
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
@@ -165,6 +165,10 @@ const AppRouter = () => {
             <Route path="/playlist/:id" element={<PlaylistPage />} />
             <Route path="/playlist/:id" element={<PlaylistPage />} />
             <Route path="/journal/:id" element={<FullJournal />} />
+             <Route 
+        path="/alerts" 
+        element={<AlertsPage /> } 
+      />
             <Route path="/journal" element={<FullJournal />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/settings/theme" element={<ThemeSelector />} />
