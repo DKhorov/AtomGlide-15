@@ -58,7 +58,7 @@ import {
   iWantItAllPurePower,mockingbirdPure,supermanPure,motorolaPure,skylineRyodan,
   bogatyrForceLyrics, rueMontmartreLyricsRu, saveYourTearsLyricsRu, goLive, jerk,
   helpMeDownLyricsRu, faceMneNeNadoLyrics, asphaltLyrics, faceVloneLyrics,flashingLights, 
-  face, selfharmLyrics, kissLyrics, zemfiraLyrics,moneyTreesPure,vybiratChudoPure, emalirovannoeSudno,giveInToMe
+  face, selfharmLyrics, kissLyrics, tamGdeKlenShumit,zemfiraLyrics,moneyTreesPure,vybiratChudoPure, emalirovannoeSudno,giveInToMe
 } from "./lyrics";
 
 const DOLBY_TRACKS = [
@@ -96,6 +96,7 @@ const LYRICS_MAP = {
   "jerk": jerk,
   "карабас": buratinoPure,
   "купер": cooperLyrics,
+  "клен": tamGdeKlenShumit,
   "griby": cooperLyrics,
   "нежная": gentleLyrics,
   "gentle": gentleLyrics,
@@ -103,7 +104,6 @@ const LYRICS_MAP = {
   "brother louie": chuCheloLyrics,
   "чучело": chuCheloLyrics,
   "slightly mad": slightlyMadLyrics,
-  "secret": doYouWantToKnowASecretLyrics,
   "отель": otel,
   "лирика": lirikaLyrics,
   "незабудка": nezabudkaPure,
