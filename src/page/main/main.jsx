@@ -366,8 +366,8 @@ const Main = () => {
   const currentAuthorStories = currentAuthorData ? currentAuthorData.stories : [];
 
   return (
-    <Box sx={{
-      width: isMobile ? '100%' : '700px', mt: 2,
+   <Box sx={{
+      width: isMobile ? '100%' : '700px', mt: 2, scrollBehavior: 'smooth', WebkitOverflowScrolling: 'touch',
       overflowY: 'auto', px: 1, '&::-webkit-scrollbar': { display: 'none' }
     }}>
       

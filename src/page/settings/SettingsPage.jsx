@@ -501,7 +501,7 @@ const SettingsPage = () => {
           icon={FiHelpCircle} label="Помощь (AtomWiki)" onClick={() => toggleModal('help', true)} color="#A5A5A5" theme={activeTheme}
         />
         <SettingsItem 
-          icon={FiInfo} label="О приложении" value="v15.0" onClick={() => toggleModal('about', true)} color="#A5A5A5" theme={activeTheme}
+          icon={FiInfo} label="О приложении" value="v15.5" onClick={() => toggleModal('about', true)} color="#A5A5A5" theme={activeTheme}
         />
         <SettingsItem 
           icon={FiLogOut} label="Выйти из аккаунта" onClick={handleLogout} showArrow={false} color="#FF3B30" noBorder theme={activeTheme}
@@ -746,7 +746,7 @@ const SettingsPage = () => {
             <Table size="small">
               <TableBody>
                 <TableRow><TableCell sx={{ color: 'rgba(154, 153, 153, 1)', borderBottom: '1px solid rgba(255,255,255,0.05)', py: 1.5, fontSize: '13px' }}>Дата релиза</TableCell><TableCell align="right" sx={{ color: 'white', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '13px', fontWeight: 500 }}>6 июля 2026</TableCell></TableRow>
-                <TableRow><TableCell sx={{ color: 'rgba(154, 153, 153, 1)', borderBottom: '1px solid rgba(255,255,255,0.05)', py: 1.5, fontSize: '13px' }}>Версия проекта</TableCell><TableCell align="right" sx={{ color: 'white', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '13px', fontWeight: 500 }}>15.1 ( 06.07.26 ) </TableCell></TableRow>
+                <TableRow><TableCell sx={{ color: 'rgba(154, 153, 153, 1)', borderBottom: '1px solid rgba(255,255,255,0.05)', py: 1.5, fontSize: '13px' }}>Версия проекта</TableCell><TableCell align="right" sx={{ color: 'white', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '13px', fontWeight: 500 }}>15.5 ( 21.07.26 ) </TableCell></TableRow>
                 <TableRow><TableCell sx={{ color: 'rgba(154, 153, 153, 1)', borderBottom: '1px solid rgba(255,255,255,0.05)', py: 1.5, fontSize: '13px' }}>Geromik Logic</TableCell><TableCell align="right" sx={{ color: 'white', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '13px', fontWeight: 500 }}>26HA34J</TableCell></TableRow>
                 <TableRow><TableCell sx={{ color: 'rgba(154, 153, 153, 1)',borderBottom: '1px solid rgba(255,255,255,0.05)', py: 1.5, fontSize: '13px' }}>Engine</TableCell><TableCell align="right" sx={{ color: 'white', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '13px', fontWeight: 500 }}>React 18</TableCell></TableRow>
                 <TableRow><TableCell sx={{ color: 'rgba(154, 153, 153, 1)', borderBottom: 'none', py: 1.5, fontSize: '13px' }}>Design</TableCell><TableCell align="right" sx={{ color: 'white', borderBottom: 'none', fontSize: '13px', fontWeight: 500 }}>BSI Gen 5</TableCell></TableRow>
